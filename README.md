@@ -5,11 +5,8 @@
 
 ## todo
 
-- download image
 - share image
 
-## preview
-
-u can only generate images for now :)
+## image generation preview
 
 ![demo](./demo/demo-1.gif) 
