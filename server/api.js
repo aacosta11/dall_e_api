@@ -7,7 +7,7 @@ const openai = new OpenAIApi(configuration);
 
 async function generateImage(req, res) {
     const { prompt, n = 1, size = '512x512' } = req.body;
-    const response = await openai.createImage({ prompt, n, size, response_format: "b64_json" });
+    const response = await openai.createImage({ prompt, n, size });
     images = response.data.data;
     return res.json(images)
 }
