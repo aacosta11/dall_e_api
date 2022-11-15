@@ -3,8 +3,13 @@
 - express backend
 - react/typescript frontend 
 
-- features to add:
--- download image
--- share image
+## todo
 
-u can only generate an image for now :)
+- download image
+- share image
+
+## preview
+
+u can only generate images for now :)
+
+![demo](./demo/demo-1.gif) 
