@@ -2,7 +2,7 @@ import { Fragment, useState, useRef, useEffect } from 'react';
 import axios from 'axios';
 import { Transition } from '@headlessui/react';
 import { validatePrompt, validateN, validateSize } from './ts/validate';
-// import { downloadImage } from './ts/download';
+import { downloadBase64File } from './ts/download';
 import { ShareIcon, XMarkIcon, DownloadIcon } from './Icons';
 
 function App() {
@@ -41,12 +41,12 @@ function App() {
     axios
       .post('/api/generate-image', {prompt,n,size})
       .then((res) =>{ 
-        console.log(res)
+        console.log(res.data)
         // enable button
         button.disabled = false;
         button.innerHTML = "Generate";
         // add image to grid
-        res.data.forEach((img : {url: string, [key:string]: any}) => addImageToGrid(img.url, prompt));
+        res.data.forEach((img : {url: string, [key:string]: any}) => addImageToGrid(img.b64_json, prompt));
       })
       .catch((err) => {
         console.log(err);
@@ -57,9 +57,9 @@ function App() {
     // create img element
     const img = document.createElement('img');
     img.classList.add('aspect-square', 'bg-gray-100', 'cursor-zoom-in');
-    img.src = src;
+    img.src = `data:image/png;base64,${src}`;
     img.alt = prompt;
-    img.addEventListener('click', () => setActiveImageSrc([src,prompt]));
+    img.addEventListener('click', () => setActiveImageSrc([`data:image/png;base64,${src}`,prompt]));
     // append img element
     gridContainerRef.current?.appendChild(img);
   }
@@ -86,7 +86,6 @@ function App() {
         onSubmit={(e) => {
           e.preventDefault();
           generateNewImage(e);
-          // addImageToGrid('1');
         }}
       >
         {/* prompt */}
@@ -111,7 +110,7 @@ function App() {
         <div id="error-text" className="text-red-600 mt-4 flex flex-col gap-2"></div>
       </form>
       {/* ---------------------------- GENERATED IMAGES ---------------------------- */}
-      <ul id="grid-container" className="grid grid-cols-2 gap-4 max-w-3xl mt-6 mx-auto"></ul>
+      <div id="grid-container" className="grid grid-cols-2 gap-4 max-w-3xl mt-6 mx-auto"></div>
       {/* ----------------------------- ENLARGED IMAGE ----------------------------- */}
       <Transition
         show={activeImageSrc.length > 0}
@@ -134,13 +133,16 @@ function App() {
               {/* close */}
               <li className="hover:bg-gray-600 cursor-pointer " onClick={()=>setActiveImageSrc([])}><XMarkIcon className="w-full h-full p-2" /></li>
               {/* share */}
-              <li className="hover:bg-gray-600/60"><ShareIcon className="w-full h-full p-2 stroke-white/60" /></li>
+              <li className="hover:bg-gray-600/50"><ShareIcon className="w-full h-full p-2 stroke-white/40" /></li>
               {/* download */}
-              <li className="hover:bg-gray-600/60"><DownloadIcon className="w-full h-full p-2 stroke-white/60" /></li>
+              <li className="hover:bg-gray-600 cursor-pointer" onClick={()=>downloadBase64File(activeImageSrc[0])}><DownloadIcon className="w-full h-full p-2" /></li>
             </ul>
             {/* image */}
-            <img src={activeImageSrc[0]} alt="" className="mx-auto aspect-square bg-gray-300" />
-            <p className="mt-6 text-black">{activeImageSrc[1]}</p>
+            <div className="w-full aspect-square flex justify-center items-center">
+              <img src={activeImageSrc[0]} alt="" className="drop-shadow-lg" />
+            </div>
+            {/* prompt */}
+            <p className="mt-6 text-black">{activeImageSrc[1] || <span>&nbsp;</span>}</p>
             <p className="absolute bottom-3 text-gray-400">
               powered by DALL·E
             </p>
